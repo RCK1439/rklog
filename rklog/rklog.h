@@ -1,39 +1,95 @@
 /**
  * rklog is a header-only logging library used for clear message logging/debugging
  * 
- * version: 1.0
+ * version: 1.1
  * author: Ruan C. Keet
  */
 
 #ifndef RK_LOG_H
 #define RK_LOG_H
 
+#include <stdarg.h>
+
 // --- rklog interface --------------------------------------------------------
 
 /**
  * Logs a formatted message with an info tag to `stdout`
+ *
+ * @param[in] fmt
+ *      The format specifier of the message
  */
 void rkLogInfo(const char *fmt, ...);
 
 /**
  * Logs a formatted message with a warning tag to `stdout`
+ *
+ * @param[in] fmt
+ *      The format specifier of the message
  */
 void rkLogWarning(const char *fmt, ...);
 
 /**
  * Logs a formatted message with an error tag to `stdout`
+ *
+ * @param[in] fmt
+ *      The format specifier of the message
  */
 void rkLogError(const char *fmt, ...);
 
 /**
- * Logs a formatted message with a fatal tag to `stdout`
+ * Logs a formatted message with a fatal error tag to `stdout`
+ *
+ * @param[in] fmt
+ *      The format specifier of the message
  */
 void rkLogFatal(const char *fmt, ...);
 
+/**
+ * Logs a formatted message with an info tag to `stdout` with explicit
+ * arguments
+ *
+ * @param[in] fmt
+ *      The format specifier of the message
+ * @param[in] args
+ *      The variadic arguments
+ */
+void rkLogInfoArgs(const char *fmt, va_list args);
+
+/**
+ * Logs a formatted message with a warning tag to `stdout` with explicit
+ * arguments
+ *
+ * @param[in] fmt
+ *      The format specifier of the message
+ * @param[in] args
+ *      The variadic arguments
+ */
+void rkLogWarningArgs(const char *fmt, va_list args);
+
+/**
+ * Logs a formatted message with an error tag to `stdout` with explicit
+ * arguments
+ *
+ * @param[in] fmt
+ *      The format specifier of the message
+ * @param[in] args
+ *      The variadic arguments
+ */
+void rkLogErrorArgs(const char *fmt, va_list args);
+
+/**
+ * Logs a formatted message with a fatal error tag to `stdout` with explicit
+ * arguments
+ *
+ * @param[in] fmt
+ *      The format specifier of the message
+ * @param[in] args
+ *      The variadic arguments
+ */
+void rkLogFatalArgs(const char *fmt, va_list args);
+
 #if defined(RK_LOG_IMPLEMENTATION)
 
-#include <assert.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -279,7 +335,7 @@ void rkLogInfo(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    rkLogInternal(LOG_LEVEL_INFO, s_State.infoStyle, fmt, args);
+    rkLogInfoArgs(fmt, args);
     va_end(args);
 }
 
@@ -288,7 +344,7 @@ void rkLogWarning(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    rkLogInternal(LOG_LEVEL_WARNING, s_State.warningStyle, fmt, args);
+    rkLogWarningArgs(fmt, args);
     va_end(args);
 }
 
@@ -297,7 +353,7 @@ void rkLogError(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    rkLogInternal(LOG_LEVEL_ERROR, s_State.errorStyle, fmt, args);
+    rkLogErrorArgs(fmt, args);
     va_end(args);
 }
 
@@ -306,8 +362,28 @@ void rkLogFatal(const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    rkLogInternal(LOG_LEVEL_FATAL_ERROR, s_State.fatalErrorStyle, fmt, args);
+    rkLogFatalArgs(fmt, args);
     va_end(args);
+}
+
+void rkLogInfoArgs(const char *fmt, va_list args)
+{
+    rkLogInternal(LOG_LEVEL_INFO, s_State.infoStyle, fmt, args);
+}
+
+void rkLogWarningArgs(const char *fmt, va_list args)
+{
+    rkLogInternal(LOG_LEVEL_WARNING, s_State.warningStyle, fmt, args);
+}
+
+void rkLogErrorArgs(const char *fmt, va_list args)
+{
+    rkLogInternal(LOG_LEVEL_ERROR, s_State.errorStyle, fmt, args);
+}
+
+void rkLogFatalArgs(const char *fmt, va_list args)
+{
+    rkLogInternal(LOG_LEVEL_FATAL_ERROR, s_State.fatalErrorStyle, fmt, args);
 }
 
 #endif /* RK_LOG_IMPLEMENTATION */
