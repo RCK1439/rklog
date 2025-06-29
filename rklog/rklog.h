@@ -88,6 +88,8 @@ void rkLogErrorArgs(const char *fmt, va_list args);
  */
 void rkLogFatalArgs(const char *fmt, va_list args);
 
+#endif /* RK_LOG_H */
+
 #if defined(RK_LOG_IMPLEMENTATION)
 
 #include <stddef.h>
@@ -387,6 +389,4 @@ void rkLogFatalArgs(const char *fmt, va_list args)
 }
 
 #endif /* RK_LOG_IMPLEMENTATION */
-
-#endif /* RK_LOG_H */
 
