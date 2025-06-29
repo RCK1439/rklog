@@ -141,11 +141,13 @@ void rkLogFatalArgs(const char *fmt, va_list args);
 
 // --- color literals ---------------------------------------------------------
 
-#define RK_COLOR_GREEN  (rkColor) { 0, 255, 0 }
-#define RK_COLOR_RED    (rkColor) { 255, 0, 0 }
-#define RK_COLOR_YELLOW (rkColor) { 255, 255, 0 }
-#define RK_COLOR_WHITE  (rkColor) { 255, 255, 255 }
-#define RK_COLOR_BLACK  (rkColor) { 0, 0, 0 }
+#define C_LITERAL(type) (type)
+
+#define RK_COLOR_GREEN  C_LITERAL(rkColor) { 0, 255, 0 }
+#define RK_COLOR_RED    C_LITERAL(rkColor) { 255, 0, 0 }
+#define RK_COLOR_YELLOW C_LITERAL(rkColor) { 255, 255, 0 }
+#define RK_COLOR_WHITE  C_LITERAL(rkColor) { 255, 255, 255 }
+#define RK_COLOR_BLACK  C_LITERAL(rkColor) { 0, 0, 0 }
 
 // --- constants --------------------------------------------------------------
 
