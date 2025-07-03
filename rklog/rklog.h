@@ -12,6 +12,10 @@
 
 // --- rklog interface --------------------------------------------------------
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 /**
  * Logs a formatted message with an info tag to `stdout`
  *
@@ -389,6 +393,10 @@ void rkLogFatalArgs(const char *fmt, va_list args)
 {
     rkLogInternal(LOG_LEVEL_FATAL_ERROR, s_State.fatalErrorStyle, fmt, args);
 }
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* RK_LOG_IMPLEMENTATION */
 
