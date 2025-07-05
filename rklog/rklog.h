@@ -11,7 +11,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -213,6 +212,7 @@ void rkLogFatalArgs(rkLogger *logger, const char *fmt, va_list args);
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 // --- string tokens ----------------------------------------------------------
