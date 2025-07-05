@@ -16,39 +16,69 @@
 extern "C" {
 #endif
 
-// --- color literals ---------------------------------------------------------
+// --- literal macros ---------------------------------------------------------
 
 #define C_LITERAL(type) (type)
 
-#define RK_COLOR_GREEN  C_LITERAL(rkColor) { 0, 255, 0 }
-#define RK_COLOR_RED    C_LITERAL(rkColor) { 255, 0, 0 }
-#define RK_COLOR_YELLOW C_LITERAL(rkColor) { 255, 255, 0 }
-#define RK_COLOR_WHITE  C_LITERAL(rkColor) { 255, 255, 255 }
-#define RK_COLOR_BLACK  C_LITERAL(rkColor) { 0, 0, 0 }
+#define RK_COLOR(R, G, B)\
+    C_LITERAL(rkColor) { \
+        .r = (uint8_t)R, \
+        .g = (uint8_t)G, \
+        .b = (uint8_t)B  \
+    }                    \
+
+#define RK_CONFIG(TAG, BG_COLOR, FG_COLOR)\
+    C_LITERAL(rkLogConfig) {              \
+        .tag = TAG,                       \
+        .background = BG_COLOR,           \
+        .foreground = FG_COLOR,           \
+    }                                     \
+
+#define RK_STYLE(CFG_INFO, CFG_WARNING, CFG_ERROR, CFG_FATAL_ERROR)\
+    C_LITERAL(rkLogStyle) {                                        \
+        .cfgInfo = CFG_INFO,                                       \
+        .cfgWarning = CFG_WARNING,                                 \
+        .cfgError = CFG_ERROR,                                     \
+        .cfgFatalError = CFG_FATAL_ERROR,                          \
+    }                                                              \
+
+#define RK_COLOR_GREEN  RK_COLOR(0, 255, 0)
+#define RK_COLOR_RED    RK_COLOR(255, 0, 0)
+#define RK_COLOR_YELLOW RK_COLOR(255, 255, 0)
+#define RK_COLOR_WHITE  RK_COLOR(255, 255, 255)
+#define RK_COLOR_BLACK  RK_COLOR(0, 0, 0)
 
 // --- defaults ---------------------------------------------------------------
 
+#define RK_DEFAULT_INFO_CFG C_LITERAL(rkLogConfig) {\
+        .tag = "INFO",                              \
+        .background = RK_COLOR_BLACK,               \
+        .foreground = RK_COLOR_GREEN,               \
+    }                                               \
+
+#define RK_DEFAULT_WARNING_CFG (rkLogConfig) {\
+        .tag = "WARNING",                     \
+        .background = RK_COLOR_BLACK,         \
+        .foreground = RK_COLOR_YELLOW,        \
+    }                                         \
+
+#define RK_DEFAULT_ERROR_CFG (rkLogConfig) {\
+        .tag = "ERROR",                     \
+        .background = RK_COLOR_BLACK,       \
+        .foreground = RK_COLOR_RED,         \
+    }                                       \
+
+#define RK_DEFAULT_FATAL_CFG (rkLogConfig) {\
+        .tag = "FATAL",                     \
+        .background = RK_COLOR_RED,         \
+        .foreground = RK_COLOR_WHITE,       \
+    }                                       \
+
 #define RK_DEFAULT_LOG_STYLE (rkLogStyle) {\
-    .cfgInfo = (rkLogConfig) {             \
-        .tag = "INFO",                     \
-        .background = RK_COLOR_BLACK,      \
-        .foreground = RK_COLOR_GREEN,      \
-    },                                     \
-    .cfgWarning = (rkLogConfig) {          \
-        .tag = "WARNING",                  \
-        .background = RK_COLOR_BLACK,      \
-        .foreground = RK_COLOR_YELLOW,     \
-    },                                     \
-    .cfgError = (rkLogConfig) {            \
-        .tag = "ERROR",                    \
-        .background = RK_COLOR_BLACK,      \
-        .foreground = RK_COLOR_RED,        \
-    },                                     \
-    .cfgFatalError = (rkLogConfig) {       \
-        .tag = "FATAL",                    \
-        .background = RK_COLOR_RED,        \
-        .foreground = RK_COLOR_WHITE,      \
-    }                                      \
+    .cfgInfo = RK_DEFAULT_INFO_CFG,        \
+    .cfgWarning = RK_DEFAULT_WARNING_CFG,  \
+    .cfgError = RK_DEFAULT_ERROR_CFG,      \
+    .cfgFatalError = RK_DEFAULT_FATAL_CFG, \
 }                                          \
 
 // --- type definitions -------------------------------------------------------
@@ -90,23 +120,58 @@ typedef struct rkLogger rkLogger;
 // --- rklog interface --------------------------------------------------------
 
 /**
- * Create's a new logger handle.
+ * Creates a new handle to a logger with default logging style and the provided
+ * title
  *
- * NOTE: if `output` is `NULL` then the logger will log to `stderr`.
- * NOTE: if `output` is to be a file on disk, then the file must be open/closed
- *       by the user of the library.  
- *
- * @param[in] output
- *      The output stream to log to
  * @param[in] title
- *      The title of this logger
- * @param[in] style
- *      The styles of all the log types
+ *      The title of the logger
  *
  * @return
  *      A handle to the newly created logger
  */
-rkLogger *rkCreateLogger(FILE *output, const char *title, rkLogStyle style);
+rkLogger *rkDefaultLogger(const char *title);
+
+/**
+ * Creates a new handle to a file logger with default logging style and the
+ * provided title
+ *
+ * @param[in] fileName
+ *      The file path and name of the file to log to
+ * @param[in] title
+ *      The title of the logger
+ *
+ * @return
+ *      A handle to the newly created logger
+ */
+rkLogger *rkDefaultFileLogger(const char *fileName, const char *title);
+
+/**
+ * Creates a new handle to a logger with custom logging style
+ * specifications
+ *
+ * @param[in] title
+ *      The title of this logger
+ * @param[in] style
+ *      The configuration of all the log types
+ *
+ * @return
+ *      A handle to the newly created logger
+ */
+rkLogger *rkCreateLogger(const char *title, rkLogStyle style);
+
+/**
+ * Creates a new handle a new handle to a file logger with custom logging style
+ * specifications
+ *
+ * @param[in] title
+ *      The title of this logger
+ * @param[in] style
+ *      The configuration of all the log types
+ *
+ * @return
+ *      A handle to the newly created logger
+ */
+rkLogger *rkCreateFileLogger(const char *fileName, const char *title, rkLogStyle style);
 
 /**
  * Closes the logger and frees all resources used by the logger.
@@ -284,15 +349,23 @@ typedef struct rkTimeStamp
 struct rkLogger
 {
     char        title[MAX_LOGGER_TITLE_SIZE]; // the title for this logger
-    FILE       *output;                       // output stream for the logging messages
     rkLogStyle  style;                        // color configurations for each severity level
+    FILE       *output;                       // output stream for the logging messages
 };
 
-// --- global state -----------------------------------------------------------
-
-// It's empty here...
-
 // --- utility functions ------------------------------------------------------
+
+/**
+ * Allocates and creates a new logger handle
+ *
+ * @param[in] out
+ *      The output stream handle of the logger
+ * @param[in] title
+ *      The title of the logger
+ * @param[in] style
+ *      The style specification of the logger
+ */
+static rkLogger *rkNewLogger(FILE *out, const char *title, rkLogStyle style);
 
 /**
  * Logs the formatted message with its configuration to `stdout`
@@ -348,6 +421,21 @@ static rkTimeStamp rkGetCurrentTime(void);
 
 // --- utility function implementation ----------------------------------------
 
+static rkLogger *rkNewLogger(FILE *out, const char *title, rkLogStyle style)
+{
+    rkLogger *const logger = (rkLogger *)malloc(sizeof(rkLogger));
+    if (!logger)
+    {
+        return NULL;
+    }
+
+    strncpy(logger->title, title, MAX_LOGGER_TITLE_SIZE);
+    logger->style = style;
+    logger->output = out;
+
+    return logger;
+}
+
 static void rkLogInternal(FILE *out, const char *title, rkLogConfig cfg, const char *fmt, va_list args)
 {
     char prelude[MAX_PRELUDE_SIZE+1] = { 0 };
@@ -393,23 +481,39 @@ static rkTimeStamp rkGetCurrentTime(void)
 
 // --- rklog implementation ---------------------------------------------------
 
-rkLogger *rkCreateLogger(FILE *output, const char *title, rkLogStyle style)
+rkLogger *rkDefaultLogger(const char *title)
 {
-    rkLogger *const logger = (rkLogger *)malloc(sizeof(rkLogger));
-    if (!logger)
+    return rkCreateLogger(title, RK_DEFAULT_LOG_STYLE);
+}
+
+rkLogger *rkDefaultFileLogger(const char *fileName, const char *title)
+{
+    return rkCreateFileLogger(fileName, title, RK_DEFAULT_LOG_STYLE);
+}
+
+rkLogger *rkCreateFileLogger(const char *fileName, const char *title, rkLogStyle style)
+{
+    FILE *out = fopen(fileName, "w");
+    if (!out)
     {
         return NULL;
     }
 
-    logger->output = !output ? stderr : output;
-    strncpy(logger->title, title, MAX_LOGGER_TITLE_SIZE);
-    logger->style = style;
+    return rkNewLogger(out, title, style);
+}
 
-    return logger;
+rkLogger *rkCreateLogger(const char *title, rkLogStyle style)
+{
+    return rkNewLogger(stderr, title, style);
 }
 
 void rkCloseLogger(rkLogger *logger)
 {
+    if (logger->output != stderr)
+    {
+        fclose(logger->output);
+    }
+
     free(logger);
 }
 
