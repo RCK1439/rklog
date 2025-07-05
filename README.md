@@ -13,15 +13,20 @@ The following program;
 
 ```c
 #define RK_LOG_IMPLEMENTATION
-#include <rklog/rklog.h>
+#include "rklog/rklog.h"
 
 int main(void)
 {
-    rkLogInfo("Hello, World!");
-    rkLogWarning("Oh no, a warning: %s", "there be dragons!");
-    rkLogError("Some serious dragons!! Here's a number, why not: %d", 5);
-    rkLogFatal("Cannot recover from this!");
+    rkLogger *const logger = rkCreateLogger(NULL, "YOUR_TITLE", RK_DEFAULT_LOG_STYLE);
+
+    rkLogInfo(logger, "Hello, World!");
+    rkLogWarning(logger, "Oh no, a warning: %s", "there be dragons!");
+    rkLogError(logger, "Some serious dragons!! Here's a number, why not: %d", 5);
+    rkLogFatal(logger, "Cannot recover from this!");
+
+    rkCloseLogger(logger);
 }
+
 ```
 
 yields the following output:
@@ -32,14 +37,13 @@ yields the following output:
 
 As seen in the example above, messages are logged in a format:
 ```
-[severity]:[hh:mm:ss]: <message>
+[title]:[severity]:[hh:mm:ss]: <message>
 ```
 
-Based on the severity of the log, the color changes
+In the example above `RK_DEFAULT_LOG_STYLE` was used for the logging style parameter. This can, of course be configured and styled in whichever way you please!
 
 ## Future Plans
 
-- Customizable logging colors
 - Customizable logging formats
-- Thread safe logging
+- Thread safe logging (implemented, but untested)
 - More portability

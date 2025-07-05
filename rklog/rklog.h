@@ -9,96 +9,210 @@
 #define RK_LOG_H
 
 #include <stdarg.h>
-
-// --- rklog interface --------------------------------------------------------
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
+// --- color literals ---------------------------------------------------------
+
+#define C_LITERAL(type) (type)
+
+#define RK_COLOR_GREEN  C_LITERAL(rkColor) { 0, 255, 0 }
+#define RK_COLOR_RED    C_LITERAL(rkColor) { 255, 0, 0 }
+#define RK_COLOR_YELLOW C_LITERAL(rkColor) { 255, 255, 0 }
+#define RK_COLOR_WHITE  C_LITERAL(rkColor) { 255, 255, 255 }
+#define RK_COLOR_BLACK  C_LITERAL(rkColor) { 0, 0, 0 }
+
+// --- defaults ---------------------------------------------------------------
+
+#define RK_DEFAULT_LOG_STYLE (rkLogStyle) {\
+    .cfgInfo = (rkLogConfig) {             \
+        .tag = "INFO",                     \
+        .background = RK_COLOR_BLACK,      \
+        .foreground = RK_COLOR_GREEN,      \
+    },                                     \
+    .cfgWarning = (rkLogConfig) {          \
+        .tag = "WARNING",                  \
+        .background = RK_COLOR_BLACK,      \
+        .foreground = RK_COLOR_YELLOW,     \
+    },                                     \
+    .cfgError = (rkLogConfig) {            \
+        .tag = "ERROR",                    \
+        .background = RK_COLOR_BLACK,      \
+        .foreground = RK_COLOR_RED,        \
+    },                                     \
+    .cfgFatalError = (rkLogConfig) {       \
+        .tag = "FATAL",                    \
+        .background = RK_COLOR_RED,        \
+        .foreground = RK_COLOR_WHITE,      \
+    }                                      \
+}                                          \
+
+// --- type definitions -------------------------------------------------------
+
+/**
+ * Struct describing 24-bit color for use with the ANSI codes
+ */
+typedef struct rkColor
+{
+    uint8_t r; // red channel
+    uint8_t g; // green channel
+    uint8_t b; // blue channel
+} rkColor;
+
+/**
+ * Struct holding color information relating to log messages
+ */
+typedef struct rkLogConfig
+{
+    const char *tag;        // tag title for the severity level
+    rkColor     background; // background color
+    rkColor     foreground; // foreground color
+} rkLogConfig;
+
+/**
+ * Struct containing the overall style of a logger. Mainly just holds color
+ * and tag information of each of the log types.
+ */
+typedef struct rkLogStyle
+{
+    rkLogConfig cfgInfo;       // the configuration for info logs
+    rkLogConfig cfgWarning;    // the configuration for warning logs
+    rkLogConfig cfgError;      // the configuration for error logs
+    rkLogConfig cfgFatalError; // the configuration for fatal error logs
+} rkLogStyle;
+
+typedef struct rkLogger rkLogger;
+
+// --- rklog interface --------------------------------------------------------
+
+/**
+ * Create's a new logger handle.
+ *
+ * NOTE: if `output` is `NULL` then the logger will log to `stderr`.
+ * NOTE: if `output` is to be a file on disk, then the file must be open/closed
+ *       by the user of the library.  
+ *
+ * @param[in] output
+ *      The output stream to log to
+ * @param[in] title
+ *      The title of this logger
+ * @param[in] style
+ *      The styles of all the log types
+ *
+ * @return
+ *      A handle to the newly created logger
+ */
+rkLogger *rkCreateLogger(FILE *output, const char *title, rkLogStyle style);
+
+/**
+ * Closes the logger and frees all resources used by the logger.
+ *
+ * @param[in] logger
+ *      The handle of the logger to close
+ */
+void rkCloseLogger(rkLogger *logger);
+
 /**
  * Logs a formatted message with an info tag to `stdout`
  *
+ * @param[in] logger
+ *      A handle to the logger
  * @param[in] fmt
  *      The format specifier of the message
  */
-void rkLogInfo(const char *fmt, ...);
+void rkLogInfo(rkLogger *logger, const char *fmt, ...);
 
 /**
  * Logs a formatted message with a warning tag to `stdout`
  *
+ * @param[in] logger
+ *      A handle to the logger
  * @param[in] fmt
  *      The format specifier of the message
  */
-void rkLogWarning(const char *fmt, ...);
+void rkLogWarning(rkLogger *logger, const char *fmt, ...);
 
 /**
  * Logs a formatted message with an error tag to `stdout`
  *
+ * @param[in] logger
+ *      A handle to the logger
  * @param[in] fmt
  *      The format specifier of the message
  */
-void rkLogError(const char *fmt, ...);
+void rkLogError(rkLogger *logger, const char *fmt, ...);
 
 /**
  * Logs a formatted message with a fatal error tag to `stdout`
  *
+ * @param[in] logger
+ *      A handle to the logger
  * @param[in] fmt
  *      The format specifier of the message
  */
-void rkLogFatal(const char *fmt, ...);
+void rkLogFatal(rkLogger *logger, const char *fmt, ...);
 
 /**
  * Logs a formatted message with an info tag to `stdout` with explicit
  * arguments
  *
+ * @param[in] logger
+ *      A handle to the logger
  * @param[in] fmt
  *      The format specifier of the message
  * @param[in] args
  *      The variadic arguments
  */
-void rkLogInfoArgs(const char *fmt, va_list args);
+void rkLogInfoArgs(rkLogger *logger, const char *fmt, va_list args);
 
 /**
  * Logs a formatted message with a warning tag to `stdout` with explicit
  * arguments
  *
+ * @param[in] logger
+ *      A handle to the logger
  * @param[in] fmt
  *      The format specifier of the message
  * @param[in] args
  *      The variadic arguments
  */
-void rkLogWarningArgs(const char *fmt, va_list args);
+void rkLogWarningArgs(rkLogger *logger, const char *fmt, va_list args);
 
 /**
  * Logs a formatted message with an error tag to `stdout` with explicit
  * arguments
  *
+ * @param[in] logger
+ *      A handle to the logger
  * @param[in] fmt
  *      The format specifier of the message
  * @param[in] args
  *      The variadic arguments
  */
-void rkLogErrorArgs(const char *fmt, va_list args);
+void rkLogErrorArgs(rkLogger *logger, const char *fmt, va_list args);
 
 /**
  * Logs a formatted message with a fatal error tag to `stdout` with explicit
  * arguments
  *
+ * @param[in] logger
+ *      A handle to the logger
  * @param[in] fmt
  *      The format specifier of the message
  * @param[in] args
  *      The variadic arguments
  */
-void rkLogFatalArgs(const char *fmt, va_list args);
-
-#endif /* RK_LOG_H */
+void rkLogFatalArgs(rkLogger *logger, const char *fmt, va_list args);
 
 #if defined(RK_LOG_IMPLEMENTATION)
 
 #include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 // --- string tokens ----------------------------------------------------------
@@ -130,47 +244,29 @@ void rkLogFatalArgs(const char *fmt, va_list args);
 //                                                                | true color mode
 //                                                                background
 
-#define RK_FMT_LABEL "[%s]:[%02d:%02d:%02d]: "
-//                      |      |    |    |
-//                      |      |    |    seconds
-//                      |      |    minutes
-//                      |      hours
-//                      log level
+#define RK_FMT_LABEL "[%s]:[%s]:[%02d:%02d:%02d]: "
+//                      |    |      |    |    |
+//                      |    |      |    |    seconds
+//                      |    |      |    minutes
+//                      |    |      hours
+//                      |    log severity
+//                      title
 
-#define RK_FMT_STDOUT "%s%s%s" RK_TOKEN_ESCAPE_CODE_RESET "\n"
+#define RK_FMT_OUTPUT "%s%s%s" RK_TOKEN_ESCAPE_CODE_RESET "\n"
 //                      | | |
 //                      | | log message
 //                      | log label
 //                      log prelude
 
-// --- color literals ---------------------------------------------------------
-
-#define C_LITERAL(type) (type)
-
-#define RK_COLOR_GREEN  C_LITERAL(rkColor) { 0, 255, 0 }
-#define RK_COLOR_RED    C_LITERAL(rkColor) { 255, 0, 0 }
-#define RK_COLOR_YELLOW C_LITERAL(rkColor) { 255, 255, 0 }
-#define RK_COLOR_WHITE  C_LITERAL(rkColor) { 255, 255, 255 }
-#define RK_COLOR_BLACK  C_LITERAL(rkColor) { 0, 0, 0 }
-
 // --- constants --------------------------------------------------------------
 
+#define MAX_LOGGER_TITLE_SIZE 64
+
 #define MAX_PRELUDE_SIZE  64
-#define MAX_LABEL_SIZE    64
+#define MAX_LABEL_SIZE    (64 + MAX_LOGGER_TITLE_SIZE)
 #define MAX_MESSAGE_SIZE  256
 
 // --- type definitions -------------------------------------------------------
-
-/**
- * Descriptor enum describing the severity of the log message
- */
-typedef enum rkLogLevel
-{
-    LOG_LEVEL_INFO        = 0,
-    LOG_LEVEL_WARNING     = 1,
-    LOG_LEVEL_ERROR       = 2,
-    LOG_LEVEL_FATAL_ERROR = 3,
-} rkLogLevel;
 
 /**
  * Struct holding the system time at the point the log occured
@@ -183,80 +279,36 @@ typedef struct rkTimeStamp
 } rkTimeStamp;
 
 /**
- * Struct describing 24-bit color for use with the ANSI codes
- */
-typedef struct rkColor
-{
-    uint8_t r; // red channel
-    uint8_t g; // green channel
-    uint8_t b; // blue channel
-} rkColor;
-
-/**
- * Struct holding color information relating to log messages
- */
-typedef struct rkLogStyle
-{
-    rkColor background; // background color
-    rkColor foreground; // foreground color
-} rkLogStyle;
-
-/**
  * Struct containing the settings of the different log messages
  */
-typedef struct rkConfig
+struct rkLogger
 {
-    rkLogStyle infoStyle;       // style for info messages
-    rkLogStyle warningStyle;    // style for warning messages
-    rkLogStyle errorStyle;      // style for error messages
-    rkLogStyle fatalErrorStyle; // style for fatal error messages
-} rkConfig;
+    char        title[MAX_LOGGER_TITLE_SIZE]; // the title for this logger
+    FILE       *output;                       // output stream for the logging messages
+    rkLogStyle  style;                        // color configurations for each severity level
+};
 
 // --- global state -----------------------------------------------------------
 
-// Tags used for the labels of the log messages 
-static const char *s_Tags[] = {
-    "INFO",
-    "WARNING",
-    "ERROR",
-    "FATAL"
-};
-
-// Global state of the library
-static const rkConfig s_State = {
-    .infoStyle = {
-        .background = RK_COLOR_BLACK,
-        .foreground = RK_COLOR_GREEN
-    },
-    .warningStyle = {
-        .background = RK_COLOR_BLACK,
-        .foreground = RK_COLOR_YELLOW
-    },
-    .errorStyle = {
-        .background = RK_COLOR_BLACK,
-        .foreground = RK_COLOR_RED
-    },
-    .fatalErrorStyle = {
-        .background = RK_COLOR_RED,
-        .foreground = RK_COLOR_WHITE
-    },
-};
+// It's empty here...
 
 // --- utility functions ------------------------------------------------------
 
 /**
  * Logs the formatted message with its configuration to `stdout`
  *
- * @param[in] level
- *      The severity level of the log message
- * @param[in] style
- *      The style in which the colors of the log message must look
+ * @param[in] out
+ *      The output stream to log to
+ * @param[in] title
+ *      The title of the logger
+ * @param[in] cfg
+ *      The configuration in which the colors of how the log message must look
  * @param[in] fmt
  *      The format of the message
  * @param[in] args
  *      Variadic arguments
  */
-static void rkLogInternal(rkLogLevel level, rkLogStyle style, const char *fmt, va_list args);
+static void rkLogInternal(FILE *out, const char *title, rkLogConfig cfg, const char *fmt, va_list args);
 
 /**
  * Formats `buf` to be the log message prelude
@@ -279,29 +331,34 @@ static void rkGenPrelude(char *buf, size_t len, rkColor background, rkColor fore
  *      The buffer to format according to the label
  * @param[in] len
  *      The maximum length of the buffer
- * @param[in] level
- *      The severity level of the log message
+ * @param[in] tag
+ *      The severity tag of the log message
+ * @param[in] title
+ *      The title of the logger
  */
-static void rkGenLabel(char *buf, size_t len, rkLogLevel level);
+static void rkGenLabel(char *buf, size_t len, const char *tag, const char *title);
 
 /**
- * Queries the system's current local time 
+ * Queries the system's current local time
+ *
+ * @return
+ *      The system time
  */
 static rkTimeStamp rkGetCurrentTime(void);
 
 // --- utility function implementation ----------------------------------------
 
-static void rkLogInternal(rkLogLevel level, rkLogStyle style, const char *fmt, va_list args)
+static void rkLogInternal(FILE *out, const char *title, rkLogConfig cfg, const char *fmt, va_list args)
 {
     char prelude[MAX_PRELUDE_SIZE+1] = { 0 };
     char label[MAX_LABEL_SIZE+1] = { 0 };
     char message[MAX_MESSAGE_SIZE+1] = { 0 };
 
-    rkGenPrelude(prelude, MAX_PRELUDE_SIZE, style.foreground, style.background);
-    rkGenLabel(label, MAX_LABEL_SIZE, level);
+    rkGenPrelude(prelude, MAX_PRELUDE_SIZE, cfg.foreground, cfg.background);
+    rkGenLabel(label, MAX_LABEL_SIZE, title, cfg.tag);
 
     vsnprintf(message, MAX_MESSAGE_SIZE, fmt, args);
-    fprintf(stdout, RK_FMT_STDOUT, prelude, label, message);
+    fprintf(out, RK_FMT_OUTPUT, prelude, label, message);
 }
 
 static void rkGenPrelude(char *buf, size_t len, rkColor background, rkColor foreground)
@@ -312,17 +369,15 @@ static void rkGenPrelude(char *buf, size_t len, rkColor background, rkColor fore
     );
 }
 
-static void rkGenLabel(char *buf, size_t len, rkLogLevel level)
+static void rkGenLabel(char *buf, size_t len, const char *title, const char *tag)
 {
-    const char *label = s_Tags[level];
-    const rkTimeStamp timeStamp = rkGetCurrentTime();
-    
-    snprintf(buf, len, RK_FMT_LABEL, label, timeStamp.hours, timeStamp.minutes, timeStamp.seconds);
+    const rkTimeStamp timeStamp = rkGetCurrentTime();   
+    snprintf(buf, len, RK_FMT_LABEL, title, tag, timeStamp.hours, timeStamp.minutes, timeStamp.seconds);
 }
 
 static rkTimeStamp rkGetCurrentTime(void)
 {
-    struct tm *timeInfo;
+    struct tm *timeInfo = NULL;
 
     const time_t now = time(NULL);
     timeInfo = localtime(&now);
@@ -338,65 +393,86 @@ static rkTimeStamp rkGetCurrentTime(void)
 
 // --- rklog implementation ---------------------------------------------------
 
-void rkLogInfo(const char *fmt, ...)
+rkLogger *rkCreateLogger(FILE *output, const char *title, rkLogStyle style)
+{
+    rkLogger *const logger = (rkLogger *)malloc(sizeof(rkLogger));
+    if (!logger)
+    {
+        return NULL;
+    }
+
+    logger->output = !output ? stderr : output;
+    strncpy(logger->title, title, MAX_LOGGER_TITLE_SIZE);
+    logger->style = style;
+
+    return logger;
+}
+
+void rkCloseLogger(rkLogger *logger)
+{
+    free(logger);
+}
+
+void rkLogInfo(rkLogger *logger, const char *fmt, ...)
 {
     va_list args;
 
     va_start(args, fmt);
-    rkLogInfoArgs(fmt, args);
+    rkLogInfoArgs(logger, fmt, args);
     va_end(args);
 }
 
-void rkLogWarning(const char *fmt, ...)
+void rkLogWarning(rkLogger *logger, const char *fmt, ...)
 {
     va_list args;
 
     va_start(args, fmt);
-    rkLogWarningArgs(fmt, args);
+    rkLogWarningArgs(logger, fmt, args);
     va_end(args);
 }
 
-void rkLogError(const char *fmt, ...)
+void rkLogError(rkLogger *logger, const char *fmt, ...)
 {
     va_list args;
 
     va_start(args, fmt);
-    rkLogErrorArgs(fmt, args);
+    rkLogErrorArgs(logger, fmt, args);
     va_end(args);
 }
 
-void rkLogFatal(const char *fmt, ...)
+void rkLogFatal(rkLogger *logger, const char *fmt, ...)
 {
     va_list args;
 
     va_start(args, fmt);
-    rkLogFatalArgs(fmt, args);
+    rkLogFatalArgs(logger, fmt, args);
     va_end(args);
 }
 
-void rkLogInfoArgs(const char *fmt, va_list args)
+void rkLogInfoArgs(rkLogger *logger, const char *fmt, va_list args)
 {
-    rkLogInternal(LOG_LEVEL_INFO, s_State.infoStyle, fmt, args);
+    rkLogInternal(logger->output, logger->title, logger->style.cfgInfo, fmt, args);
 }
 
-void rkLogWarningArgs(const char *fmt, va_list args)
+void rkLogWarningArgs(rkLogger *logger, const char *fmt, va_list args)
 {
-    rkLogInternal(LOG_LEVEL_WARNING, s_State.warningStyle, fmt, args);
+    rkLogInternal(logger->output, logger->title, logger->style.cfgWarning, fmt, args);
 }
 
-void rkLogErrorArgs(const char *fmt, va_list args)
+void rkLogErrorArgs(rkLogger *logger, const char *fmt, va_list args)
 {
-    rkLogInternal(LOG_LEVEL_ERROR, s_State.errorStyle, fmt, args);
+    rkLogInternal(logger->output, logger->title, logger->style.cfgError, fmt, args);
 }
 
-void rkLogFatalArgs(const char *fmt, va_list args)
+void rkLogFatalArgs(rkLogger *logger, const char *fmt, va_list args)
 {
-    rkLogInternal(LOG_LEVEL_FATAL_ERROR, s_State.fatalErrorStyle, fmt, args);
+    rkLogInternal(logger->output, logger->title, logger->style.cfgFatalError, fmt, args);
 }
+
+#endif /* RK_LOG_IMPLEMENTATION */
 
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* RK_LOG_IMPLEMENTATION */
-
+#endif /* RK_LOG_H */
