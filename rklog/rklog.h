@@ -48,6 +48,9 @@ extern "C" {
 #define RK_COLOR_WHITE  RK_COLOR(255, 255, 255)
 #define RK_COLOR_BLACK  RK_COLOR(0, 0, 0)
 
+#define RK_NO_BG_COL RK_COLOR_BLACK
+#define RK_NO_FG_COL RK_COLOR_WHITE
+
 // --- defaults ---------------------------------------------------------------
 
 #define RK_DEFAULT_INFO_CFG C_LITERAL(rkLogConfig) {\
@@ -295,19 +298,19 @@ void rkLogFatalArgs(rkLogger *logger, const char *fmt, va_list args);
 
 // --- formats ----------------------------------------------------------------
 
-//                                                  foreground
-//                                                  | true color mode
-//                                                  | |  red channel
-//                                                  | |  |  green channel
-//                                                  | |  |  |  blue channel
-//                                                  | |  |  |  |
-#define RK_FMT_PRELUDE RK_TOKEN_ESCAPE_CODE_START "48;2;%d;%d;%d;38;2;%d;%d;%d" RK_TOKEN_ESCAPE_CODE_END
-//                                                                | |  |  |  |
-//                                                                | |  |  |  blue channel
-//                                                                | |  |  green channel
-//                                                                | |  red channel
-//                                                                | true color mode
-//                                                                background
+//                                                        foreground
+//                                                        | true color mode
+//                                                        | |  red channel
+//                                                        | |  |  green channel
+//                                                        | |  |  |  blue channel
+//                                                        | |  |  |  |
+#define RK_FMT_COLOR_PRELUDE RK_TOKEN_ESCAPE_CODE_START "48;2;%d;%d;%d;38;2;%d;%d;%d" RK_TOKEN_ESCAPE_CODE_END
+//                                                                      | |  |  |  |
+//                                                                      | |  |  |  blue channel
+//                                                                      | |  |  green channel
+//                                                                      | |  red channel
+//                                                                      | true color mode
+//                                                                      background
 
 #define RK_FMT_LABEL "[%s]:[%s]:[%02d:%02d:%02d]: "
 //                      |    |      |    |    |
@@ -317,11 +320,16 @@ void rkLogFatalArgs(rkLogger *logger, const char *fmt, va_list args);
 //                      |    log severity
 //                      title
 
-#define RK_FMT_OUTPUT "%s%s%s" RK_TOKEN_ESCAPE_CODE_RESET "\n"
-//                      | | |
-//                      | | log message
-//                      | log label
-//                      log prelude
+#define RK_FMT_COLOR_OUTPUT "%s%s%s" RK_TOKEN_ESCAPE_CODE_RESET "\n"
+//                            | | |
+//                            | | log message
+//                            | log label
+//                            log prelude
+
+#define RK_FMT_OUTPUT "%s%s\n"
+//                      | |
+//                      | log message
+//                      log label
 
 // --- constants --------------------------------------------------------------
 
@@ -384,7 +392,7 @@ static rkLogger *rkNewLogger(FILE *out, const char *title, rkLogStyle style);
 static void rkLogInternal(FILE *out, const char *title, rkLogConfig cfg, const char *fmt, va_list args);
 
 /**
- * Formats `buf` to be the log message prelude
+ * Formats `buf` to be the colored log message prelude
  *
  * @param[out] buf
  *      The buffer to format according to the prelude
@@ -395,7 +403,7 @@ static void rkLogInternal(FILE *out, const char *title, rkLogConfig cfg, const c
  * @param[in] foreground
  *      The foreground color of the text
  */
-static void rkGenPrelude(char *buf, size_t len, rkColor background, rkColor foreground);
+static void rkGenColorPrelude(char *buf, size_t len, rkColor background, rkColor foreground);
 
 /**
  * Formats `buf` to contain the log message tag and timestamp
@@ -438,20 +446,28 @@ static rkLogger *rkNewLogger(FILE *out, const char *title, rkLogStyle style)
 
 static void rkLogInternal(FILE *out, const char *title, rkLogConfig cfg, const char *fmt, va_list args)
 {
-    char prelude[MAX_PRELUDE_SIZE+1] = { 0 };
     char label[MAX_LABEL_SIZE+1] = { 0 };
     char message[MAX_MESSAGE_SIZE+1] = { 0 };
-
-    rkGenPrelude(prelude, MAX_PRELUDE_SIZE, cfg.foreground, cfg.background);
+    
     rkGenLabel(label, MAX_LABEL_SIZE, title, cfg.tag);
-
     vsnprintf(message, MAX_MESSAGE_SIZE, fmt, args);
-    fprintf(out, RK_FMT_OUTPUT, prelude, label, message);
+    
+    if (out == stderr)
+    {
+        char prelude[MAX_PRELUDE_SIZE+1] = { 0 };
+        rkGenColorPrelude(prelude, MAX_PRELUDE_SIZE, cfg.foreground, cfg.background);
+
+        fprintf(out, RK_FMT_COLOR_OUTPUT, prelude, label, message);
+    }
+    else
+    {
+        fprintf(out, RK_FMT_OUTPUT, label, message);
+    }
 }
 
-static void rkGenPrelude(char *buf, size_t len, rkColor background, rkColor foreground)
+static void rkGenColorPrelude(char *buf, size_t len, rkColor background, rkColor foreground)
 {
-    snprintf(buf, len, RK_FMT_PRELUDE,
+    snprintf(buf, len, RK_FMT_COLOR_PRELUDE,
         foreground.r, foreground.g, foreground.b,
         background.r, background.g, background.b
     );
