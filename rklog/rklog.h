@@ -77,12 +77,12 @@ extern "C" {
         .foreground = RK_COLOR_WHITE,       \
     }                                       \
 
-#define RK_DEFAULT_LOG_STYLE (rkLogStyle) {\
-    .cfgInfo = RK_DEFAULT_INFO_CFG,        \
-    .cfgWarning = RK_DEFAULT_WARNING_CFG,  \
-    .cfgError = RK_DEFAULT_ERROR_CFG,      \
-    .cfgFatalError = RK_DEFAULT_FATAL_CFG, \
-}                                          \
+#define RK_DEFAULT_LOG_STYLE (rkLogStyle) {   \
+        .cfgInfo = RK_DEFAULT_INFO_CFG,       \
+        .cfgWarning = RK_DEFAULT_WARNING_CFG, \
+        .cfgError = RK_DEFAULT_ERROR_CFG,     \
+        .cfgFatalError = RK_DEFAULT_FATAL_CFG,\
+    }                                         \
 
 // --- type definitions -------------------------------------------------------
 
@@ -282,6 +282,9 @@ void rkLogFatalArgs(rkLogger *logger, const char *fmt, va_list args);
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#if defined(_WIN32) || defined(_WIN64)
+#include <ConsoleApi.h>
+#endif
 
 // --- string tokens ----------------------------------------------------------
 
@@ -440,6 +443,17 @@ static rkLogger *rkNewLogger(FILE *out, const char *title, rkLogStyle style)
     strncpy(logger->title, title, MAX_LOGGER_TITLE_SIZE);
     logger->style = style;
     logger->output = out;
+
+#if defined(_WIN32) || defined(_WIN64)
+    if (out == stderr)
+    {
+        const HANDLE hErr = GetStdHandle(STD_ERROR_HANDLE);
+        DWORD dwMode = 0;
+        GetConsoleMode(hErr, &dwMode);
+        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        SetConsoleMode(hErr, dwMode);
+    }
+#endif
 
     return logger;
 }
