@@ -283,7 +283,8 @@ void rkLogFatalArgs(rkLogger *logger, const char *fmt, va_list args);
 #include <string.h>
 #include <time.h>
 #if defined(_WIN32) || defined(_WIN64)
-#include <ConsoleApi.h>
+#define WINDOWS_LEAN_AND_MEAN
+#include <Windows.h> // This is a rough include ... :(
 #endif
 
 // --- string tokens ----------------------------------------------------------
