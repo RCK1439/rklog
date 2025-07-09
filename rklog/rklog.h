@@ -10,7 +10,6 @@
 
 #include <stdarg.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -279,6 +278,7 @@ void rkLogFatalArgs(rkLogger *logger, const char *fmt, va_list args);
 #if defined(RK_LOG_IMPLEMENTATION)
 
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
