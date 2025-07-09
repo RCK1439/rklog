@@ -4,3 +4,5 @@ custom_logger_example
 file_logger_example
 
 *.txt
+
+*.exe

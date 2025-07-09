@@ -1,7 +1,7 @@
 /**
  * rklog is a header-only logging library used for clear message logging/debugging
  * 
- * version: 1.2
+ * version: 1.3
  * author: Ruan C. Keet
  */
 
