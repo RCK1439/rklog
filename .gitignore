@@ -2,6 +2,7 @@
 basic_logger_example
 custom_logger_example
 file_logger_example
+custom_file_logger_example
 
 *.txt
 

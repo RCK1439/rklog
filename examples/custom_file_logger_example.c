@@ -9,10 +9,10 @@ int main(void)
     // background colors. In the context of file logging, this can be any
     // color you please since logging to files will ignore color.
     rkLogStyle style = RK_STYLE(
-        RK_CONFIG("info", RK_NO_BG_COL, RK_NO_FG_COL),
-        RK_CONFIG("warning", RK_NO_BG_COL, RK_NO_FG_COL),
-        RK_CONFIG("error", RK_NO_BG_COL, RK_NO_FG_COL),
-        RK_CONFIG("fatal", RK_NO_BG_COL, RK_NO_FG_COL)
+        RK_CONFIG_NO_BG("info", RK_COLOR_WHITE),
+        RK_CONFIG_NO_BG("warning", RK_COLOR_WHITE),
+        RK_CONFIG_NO_BG("error", RK_COLOR_WHITE),
+        RK_CONFIG_NO_BG("fatal", RK_COLOR_WHITE)
     );
 
     // Next we create our file logger specifying the file to log to as well as

@@ -43,10 +43,10 @@ int main(void)
     // Create a custom style for our logger
     const rkLogStyle myStyle = RK_STYLE(
         // Each RK_CONFIG takes in a tag, background color and foreground color
-        RK_CONFIG("info", RK_COLOR(0, 255, 0), RK_COLOR(0, 0, 0)),
-        RK_CONFIG("warning", RK_COLOR(255, 255, 0), RK_COLOR(0, 0, 0)),
-        RK_CONFIG("error", RK_COLOR(200, 100, 100), RK_COLOR(0, 0, 0)),
-        RK_CONFIG("critical", RK_COLOR(255, 0, 0), RK_COLOR(255, 255, 255))
+        RK_CONFIG("info", RK_COLOR(0, 255, 0), RK_COLOR(0, 0, 0), true),
+        RK_CONFIG("warning", RK_COLOR(255, 255, 0), RK_COLOR(0, 0, 0), true),
+        RK_CONFIG("error", RK_COLOR(200, 100, 100), RK_COLOR(0, 0, 0), true),
+        RK_CONFIG("critical", RK_COLOR(255, 0, 0), RK_COLOR(255, 255, 255), true)
     );
     // Create a new logger with the title; "myProgram" and style
     rkLogger *const myLogger = rkCreateLogger("myProgram", myStyle);
