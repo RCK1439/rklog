@@ -1,12 +1,12 @@
-#define RK_LOG_IMPLEMENTATION
-#include "../rklog/rklog.h"
+#define RKLOG_IMPLEMENTATION
+#include <rklog/rklog.h>
 
 static const char *TITLE = "BASIC";
 
 int main(void)
 {
     // First we initialize our logger and give it a name!
-    rkLogger *logger = rkDefaultLogger(TITLE);
+    RKLogger* logger = rkDefaultLogger(TITLE);
 
     // Then, throughout our program, we can log using our logger
     rkLogInfo(logger, "Welcome to our basic example!");

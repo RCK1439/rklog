@@ -1,5 +1,5 @@
-#define RK_LOG_IMPLEMENTATION
-#include "../rklog/rklog.h"
+#define RKLOG_IMPLEMENTATION
+#include <rklog/rklog.h>
 
 int main(void)
 {
@@ -13,15 +13,15 @@ int main(void)
     //
     // Then the easiest one is RK_COLOR where the paremeters are the R, G, B
     // values ranging from 0 to 255
-    rkLogStyle style = RK_STYLE(
-        RK_CONFIG("info", RK_COLOR(0, 128, 0), RK_COLOR(255, 255, 255), true),
-        RK_CONFIG("warning", RK_COLOR(128, 128, 0), RK_COLOR(255, 255, 255), true),
-        RK_CONFIG("error", RK_COLOR(128, 0, 0), RK_COLOR(255, 255, 255), true),
-        RK_CONFIG("critical", RK_COLOR(255, 0, 0), RK_COLOR(255, 255, 255), true)
+    RKLogStyle style = RKLOG_STYLE(
+        RKLOG_CONFIG("info", RKLOG_COLOR(0, 128, 0), RKLOG_COLOR(255, 255, 255), true),
+        RKLOG_CONFIG("warning", RKLOG_COLOR(128, 128, 0), RKLOG_COLOR(255, 255, 255), true),
+        RKLOG_CONFIG("error", RKLOG_COLOR(128, 0, 0), RKLOG_COLOR(255, 255, 255), true),
+        RKLOG_CONFIG("critical", RKLOG_COLOR(255, 0, 0), RKLOG_COLOR(255, 255, 255), true)
     );
 
     // Then we can create our logger with the custom style
-    rkLogger *logger = rkCreateLogger("custom", style);
+    RKLogger* logger = rkCreateLogger("custom", style);
 
     // Make some logs...
     rkLogInfo(logger, "custom info log!");

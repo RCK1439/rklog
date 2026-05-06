@@ -8,13 +8,13 @@ A simple header-only logging library used for explicit logging and debugging
 
 ```c
 // Specify RK_LOG_IMPLEMENTATION for compilation of library
-#define RK_LOG_IMPLEMENTATION
-#include "rklog/rklog.h"
+#define RKLOG_IMPLEMENTATION
+#include <rklog/rklog.h>
 
 int main(void)
 {
     // Create a new logger with the title; "myProgram"
-    rkLogger *const myLogger = rkDefaultLogger("myProgram");
+    RKLogger *const myLogger = rkDefaultLogger("myProgram");
 
     // Make some logs...
     rkLogInfo(myLogger, "Hello everyone!");
@@ -35,21 +35,21 @@ The program above yields to the following output to `stderr`:
 
 ```c
 // Specify RK_LOG_IMPLEMENTATION for compilation of library
-#define RK_LOG_IMPLEMENTATION
-#include "rklog/rklog.h"
+#define RKLOG_IMPLEMENTATION
+#include <rklog/rklog.h>
 
 int main(void)
 {
     // Create a custom style for our logger
-    const rkLogStyle myStyle = RK_STYLE(
+    const RKLogStyle myStyle = RKLOG_STYLE(
         // Each RK_CONFIG takes in a tag, background color and foreground color
-        RK_CONFIG("info", RK_COLOR(0, 255, 0), RK_COLOR(0, 0, 0), true),
-        RK_CONFIG("warning", RK_COLOR(255, 255, 0), RK_COLOR(0, 0, 0), true),
-        RK_CONFIG("error", RK_COLOR(200, 100, 100), RK_COLOR(0, 0, 0), true),
-        RK_CONFIG("critical", RK_COLOR(255, 0, 0), RK_COLOR(255, 255, 255), true)
+        RKLOG_CONFIG("info", RKLOG_COLOR(0, 255, 0), RKLOG_COLOR(0, 0, 0), true),
+        RKLOG_CONFIG("warning", RKLOG_COLOR(255, 255, 0), RKLOG_COLOR(0, 0, 0), true),
+        RKLOG_CONFIG("error", RKLOG_COLOR(200, 100, 100), RKLOG_COLOR(0, 0, 0), true),
+        RKLOG_CONFIG("critical", RKLOG_COLOR(255, 0, 0), RKLOG_COLOR(255, 255, 255), true)
     );
     // Create a new logger with the title; "myProgram" and style
-    rkLogger *const myLogger = rkCreateLogger("myProgram", myStyle);
+    RKLogger *const myLogger = rkCreateLogger("myProgram", myStyle);
 
     // Make some logs...
     rkLogInfo(myLogger, "Hello everyone!");
@@ -72,3 +72,4 @@ The program above yields the following output to `stderr`:
 - Customizable logging formats
 - Thread safe logging (implemented, but untested)
 - More portability
+- Test on MacOS

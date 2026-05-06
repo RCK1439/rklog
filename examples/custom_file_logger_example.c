@@ -1,5 +1,5 @@
-#define RK_LOG_IMPLEMENTATION
-#include "../rklog/rklog.h"
+#define RKLOG_IMPLEMENTATION
+#include <rklog/rklog.h>
 
 int main(void)
 {
@@ -8,16 +8,16 @@ int main(void)
     // NOTE: that we use RK_NO_BG_COL and RK_NO_FG_COL for the foreground and
     // background colors. In the context of file logging, this can be any
     // color you please since logging to files will ignore color.
-    rkLogStyle style = RK_STYLE(
-        RK_CONFIG_NO_BG("info", RK_COLOR_WHITE),
-        RK_CONFIG_NO_BG("warning", RK_COLOR_WHITE),
-        RK_CONFIG_NO_BG("error", RK_COLOR_WHITE),
-        RK_CONFIG_NO_BG("fatal", RK_COLOR_WHITE)
+    RKLogStyle style = RKLOG_STYLE(
+        RKLOG_CONFIG_NO_BG("info", RKLOG_COLOR_WHITE),
+        RKLOG_CONFIG_NO_BG("warning", RKLOG_COLOR_WHITE),
+        RKLOG_CONFIG_NO_BG("error", RKLOG_COLOR_WHITE),
+        RKLOG_CONFIG_NO_BG("fatal", RKLOG_COLOR_WHITE)
     );
 
     // Next we create our file logger specifying the file to log to as well as
     // the title and style
-    rkLogger *logger = rkCreateFileLogger("custom_file_logger_logs.txt", "custom_file_logger", style);
+    RKLogger* logger = rkCreateFileLogger("custom_file_logger_logs.txt", "custom_file_logger", style);
 
     // Make some logs to our file
     rkLogInfo(logger, "info log");

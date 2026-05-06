@@ -1,11 +1,11 @@
-#define RK_LOG_IMPLEMENTATION
-#include "../rklog/rklog.h"
+#define RKLOG_IMPLEMENTATION
+#include <rklog/rklog.h>
 
 int main(void)
 {
     // We create our file logger by specifying the file to log to and the
     // title of the logger
-    rkLogger *logger = rkDefaultFileLogger("file_logger_logs.txt", "file_logger");
+    RKLogger* logger = rkDefaultFileLogger("file_logger_logs.txt", "file_logger");
 
     // Then we can make some logs to that file
     rkLogInfo(logger, "info log");
